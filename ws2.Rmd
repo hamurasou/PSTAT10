@@ -1,0 +1,230 @@
+---
+title: "PSTAT 10 Worksheet 2"
+subtitle: "Due 6/26/2024 11:59pm"
+author: "Sou Hamura"
+output: pdf_document
+---
+
+# Problem 1: Basic vector manipulation
+
+1. Recall from lecture my 2023 monthly gas bill in order was given by:
+
+```{r}
+gasbill <- c(46, 33, 39, 37, 46, 30, 48, 32, 49, 35, 30, 48)
+```
+
+It turns out the charge for December should have been 49 instead of 48. Update 
+the ```gasbill``` to reflect the true charge. Try not to “cheat” and just type 
+in all the old values again; use the existing ```gasbill``` vector.
+
+```{r}
+gasbill[12] <- 49
+gasbill
+```
+
+
+2. Recreate the following numeric vector. Avoid typing in all of the values manually.
+
+```{r, eval=FALSE}
+
+dec <- seq(-50, -54)
+inc <- seq(-53, -50)
+seq1.2 <- c(dec, inc)
+seq1.2
+
+## [1] -50 -51 -52 -53 -54 -53 -52 -51 -50
+```
+
+3. Create a vector from 1 to 10 with increments of 0.05. What is the length of this vector? Hint: Use `seq` with `by` argument.
+
+`#Function
+
+```{r}
+vec1.3 <- seq(1, 10, by=0.05)
+length(vec1.3)
+```
+
+4. Create a vector of length 100 from 1 to 10 with uniform increments. What is the increment? Hint: Use `seq` with `length` argument.
+
+```{r}
+vec1.4 <- seq(1, 10, length.out = 100)
+vec1.4[2] - vec1.4[1]
+```
+
+5. What happens if you try to use `seq` with both the `length` and `by` arguments specified?
+
+#when we try to use "seq" function with both the "length" and "by" arguments specified, an error will occer because there are too many arguments
+
+# Problem 2
+
+Download the file `ws2.csv` from the course website and import it into R. This data set has two variables named `x` and `y`.
+
+Make sure to change your `here()` function to point to your `ws2.csv` file.
+
+```{r}
+ws2_df <- read.csv("ws2.csv")
+summary(ws2_df)
+```
+
+Remember the variables in a data frame are accessed by name with the dollar sign (and that the result is a vector).
+
+1. Determine the lengths of x and y.
+
+```{r}
+length(ws2_df$x)
+length(ws2_df$y)
+```
+
+2. What is the 40th element of x and the 80th element of y?
+```{r}
+ws2_df$x[40]
+ws2_df$y[80]
+```
+
+
+3. What is the average of all the values in the data frame, including both x and y?
+```{r}
+
+x_sum <- sum(ws2_df$x)
+y_sum <- sum(ws2_df$y)
+x_len <- length(ws2_df$x)
+y_len <- length(ws2_df$y)
+x_avg <- x_sum / x_len
+y_avg <- y_sum / y_len
+average <- (x_avg + y_avg) / 2
+average
+```
+
+4. How many elements of x are greater than 70?
+```{r}
+X_70 <- ws2_df$x[ws2_df$x > 70]
+length(X_70)
+
+```
+
+
+Let’s look at the first 4 elements of x and y:
+
+```{r}
+ws2_df$x[1:4]
+## [1] 74 89 78 23
+ws2_df$y[1:4]
+## [1] 58 26 48 80
+```
+
+The first three elements of x are greater than or equal to their corresponding 
+element in y: $74 > 58$, $89 > 26$, $78 > 48$. But the fourth element of `x`, 
+23, is less than the fourth element of `y`, 80.
+
+5. How many elements of x are greater than or equal to the corresponding element in y?
+```{r}
+x_greater_y <- ws2_df$x[ws2_df$x >= ws2_df$y]
+length(x_greater_y)
+
+```
+6. What is the proportion of elements of x that are greater than or equal to the corresponding element in
+y?
+```{r}
+x_greater_y <- ws2_df$x[ws2_df$x >= ws2_df$y]
+num_xy <- length(x_greater_y)
+total <- length(ws2_df$x)
+num_xy / total
+
+```
+7. How many values in x differ from their corresponding value in y by more than 10 in absolute value?
+Hint: there is an `abs` function.
+
+```{r}
+x_val <- ws2_df$x
+y_val <- ws2_df$y
+diff_xy <- y_val - x_val 
+abs_diff <- abs(diff_xy)
+diff_10 <- abs_diff[abs_diff > 10]
+length(diff_10)
+
+```
+
+# Problem 3
+
+Create a vector of integers from 1 to 12 inclusive.
+```{r}
+vec_p3 <- 1:12
+```
+
+1. Use the vector to create a 3x4 matrix. Did recycling occur?
+
+```{r}
+matrix(vec_p3, nrow=3, ncol=4)
+
+```
+# recycling did not occur
+
+2. Use the vector to create a 4x4 matrix. Did recycling occur?
+```{r}
+matrix(vec_p3, nrow=4, ncol=4)
+
+```
+# recycling did occur
+
+# Problem 4
+
+Use the heights_df data frame from worksheet 1. The height variable is given in centimeters (cm).
+
+1. Write a vectorized function cm_to_inch that takes a numeric centimeter and converts it to inches.
+
+Apply the function to the height vector. First 10 elements are shown below:
+
+```{r}
+heights_df <- read.csv("heights.csv")
+summary(heights_df)
+```
+
+```{r}
+
+cm_to_inch <- function(cm){cm * 0.39}
+
+head(cm_to_inch(heights_df$height), 10) # the head function gives the first elements
+## [1] 62.40 67.08 65.52 71.37 68.25 73.71 60.84 65.13 76.05 64.35
+```
+
+2. Write a vectorized function cm_to_ft_inch that converts numerical values given in cm to a feet inch format, rounding to the nearest inch.
+For example,
+
+```{r}
+heights_df <- read.csv("heights.csv")
+summary(heights_df)
+```
+
+```{r}
+
+cm_to_ft_inch <- function(cm){
+  inches <- cm_to_inch(cm)
+  r_inches <- round(inches)
+  ft <- (r_inches %/% 12)
+  inch <- (r_inches %% 12)
+  s_ft <- as.character(ft)
+  s_inch <- as.character(inch)
+  return(paste(s_ft, s_inch))}
+
+cm_to_ft_inch(178)
+## [1] "5 9"
+```
+
+You may need the (vectorized) quotient function %/% and the remainder function %%:
+
+```{r}
+# Quotient: 3 goes into 7 two times
+7 %/% 3
+## [1] 2
+# Remainder: The remainder when 7 is divided by 3 is one
+7 %% 3
+## [1] 1
+```
+
+Remember you should look things up on StackOverflow if you’re stuck with some operations.
+Apply the function to the height vector.
+
+```{r}
+head(cm_to_ft_inch(heights_df$height), 10)
+## [1] "5 2" "5 7" "5 6" "5 11" "5 8" "6 2" "5 1" "5 5" "6 4" "5 4"
+```

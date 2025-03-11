@@ -1,0 +1,198 @@
+---
+title: "PSTAT 10 Homework 5"
+author: "Sou Hamura"
+date: "2024-07-30"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+```
+
+
+## Problem 1: Airquality
+
+```{r}
+
+threshold <- median(airquality$Temp, na.rm = TRUE)
+airquality$TempCategory <- ifelse(airquality$Temp > threshold, "Hotter", "Colder")
+airquality$TempCategory <- factor(airquality$TempCategory)
+threshold
+```
+
+```{r}
+ggplot(airquality, aes(x = Wind, y = Ozone, color = TempCategory)) +
+  geom_point() +
+  geom_smooth(method = "lm", color = "blue") +
+  labs(title = "Ozone and Wind in NYC, 1973",
+       x = "Wind (mph)",
+       y = "Ozone(ppb)") +
+  scale_color_manual(values = c("Colder" = "cadetblue3", "Hotter" = "tomato")) +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.border = element_blank(),
+    axis.line = element_line(color = "black"),
+    panel.background = element_blank(),
+    legend.title = element_blank()
+  ) +
+  theme_minimal()
+```
+
+
+
+## Problem 2: Derangement
+
+```{r}
+
+# from lecture 8
+x <- 1:100
+is_deranged <- function(){
+  count <- 0
+  x_val <- sample(x)
+  for(i in seq_along(x)){
+    if(x_val[i] == i){
+      count = count + 1
+    }
+  }
+  return(count <= 0)
+}
+
+```
+
+```{r}
+mean <- mean(replicate(2000, is_deranged()))
+result <- replicate(2000, is_deranged())
+result_avg <- cumsum(result) / 1:2000
+result_data <- data.frame(x = 1:2000, y = result_avg)
+
+ggplot(result_data, aes(x = x, y = y)) +
+  geom_line() +
+  labs(title = "Probability of a derangement",
+       y = "p",
+       x = "Number of replications") +
+  ylim(0.25, 1) +
+  geom_hline(yintercept = mean,color = "red") +
+  theme_minimal() +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.border = element_blank(),
+    axis.line = element_line(color = "black"),
+    panel.background = element_blank(),
+    legend.title = element_blank())
+
+```
+
+## Problem 3: World Health Organization
+
+# Part 1: For each country, year, and sex compute the total number of cases of TB. Put the result into a tibble with 4 columns.
+
+```{r}
+# from lecture 18
+
+who1 <- who |> pivot_longer(cols = new_sp_m014:newrel_f65,
+                    names_to = "key",
+                    values_to = "cases",
+                    values_drop_na = TRUE)
+who2 <- who1 |> mutate(key = stringr::str_replace(key, "newrel", "new_rel"))
+who3 <- who2 |> separate(key, c("new", "type", "sexage"), sep = "_")
+who4 <- who3 |> select(-new, -iso2, -iso3)
+who5 <- who4 |> separate(sexage, c("sex", "age"), 1)
+who_tidy <- who |>
+  pivot_longer(cols = new_sp_m014:newrel_f65,
+               names_to = "key",
+               values_to = "cases",
+               values_drop_na = TRUE) |>
+  mutate(key = stringr::str_replace(key, "newrel", "new_rel")) |>
+  separate(key, c("new", "type", "sexage"), sep = "_") |>
+  select(-new, -iso2, -iso3) |>
+  separate(sexage, c("sex", "age"), 1)
+```
+
+```{r}
+
+catplot <- who_tidy |>
+  group_by(country, year, sex) |>
+  summarize(cases = sum(cases))
+```
+
+# Part 2: Create the following plot with ggplot. For full credit, match the details exactly, other than the overall dimensions of the figure and the positioning of the labels of the outlier.
+
+```{r}
+
+#Part 2
+ggplot(catplot,aes(x = year, y = cases)) +
+  geom_point() +
+  facet_wrap(~sex,labeller = labeller(sex = c("f" = "Women", "m" = "Men"))) +
+  scale_x_continuous(breaks = seq(1980, 2015, by = 5)) +
+  scale_y_continuous(labels = scales::label_comma(), limits = c(0, 800000)) +
+  labs(
+    title = "Tuberculosis Cases in Countries by Year",
+    subtitle = "Dramatic increase in case count since mid 90s",
+    y = "Total Cases",
+    x = NULL,
+    caption = "Source: World Health Organization"
+  ) +
+  geom_text(data = subset(catplot, country == "India" & year == 2007),
+            aes(label = paste(country, year)),
+            color = "red",
+            vjust = -1) +
+  theme_minimal() +
+  theme(
+    legend.position = 'none',
+    plot.title = element_text(face = "bold", size = 14),
+    plot.subtitle = element_text(size = 10)
+  )
+```
+
+
+## Problem 4: Pew Research Center
+
+# Part 1: In a short sentence or two, explain why this dataset is not tidy.
+
+# because each row contains multiple observations while each row should only represent a single observation in a tidy dataset
+
+# Part 2 Tidy the dataset and store the result in relig_income_tidy. First few rows of the result are provided.
+
+```{r}
+
+relig_income_tidy <- relig_income |>
+  pivot_longer(cols = -religion, names_to = "income", values_to = "frequency")
+relig_income_tidy
+
+```
+
+# Part 3 Create the following plot in ggplot. For full credit, match the plot exactly, not counting the overall dimensions of the figure. It is also okay if the colors are different, but the bars must have different colors.
+
+```{r}
+
+ri_graph <- relig_income_tidy |>
+  group_by(religion) |>
+  summarise(total_frequency = sum(frequency)) #, na.rm = TRUE
+
+ri_graph <- ri_graph[order(ri_graph$total_frequency, decreasing = TRUE), ]
+
+ri_graph
+
+```
+
+
+```{r}
+
+ggplot(ri_graph, mapping = aes(y = reorder(religion, total_frequency), x = total_frequency, fill = religion)) +
+  geom_col(position = "dodge") +
+  labs(title = "Participants in Pew Research Survey",
+       caption = "Source: Pew Research Center") +
+  theme_minimal() +
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank()) +
+  guides(fill = FALSE) 
+
+```

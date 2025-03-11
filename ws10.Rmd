@@ -1,0 +1,42 @@
+---
+title: "PSTAT 10 Worksheet 10"
+author: "Sou Hamura"
+date: "2024-07-29"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(socviz)
+```
+
+```{r}
+
+vote_data <- socviz::gss_sm |>
+  select(polviews, sex, obama) |>
+  filter(obama == 1) |>
+  drop_na(polviews) |>
+  group_by(sex, polviews) |>
+  summarise(count = sum(obama, na.rm = T)) |>
+  mutate(percentage = count / sum(count))
+
+
+ggplot(vote_data, mapping = aes(x = percentage, y = polviews, fill = sex)) +
+  geom_col(position = "dodge") +
+  facet_grid(~ sex) +
+  guides(fill = "none") +
+  labs(title = "Political views and voting in the 2012 election",
+       subtitle = "Obama's vote share among men and women",
+       caption = "Source: GSS",
+       y = "Political views",
+       fill = "Sex") +
+  scale_x_continuous(labels = scales::percent) +
+  theme_minimal()
+
+```
+
+

@@ -1,0 +1,56 @@
+---
+title: "PSTAT 10 Worksheet 6"
+author: "Sou Hamura"
+date: "2024-07-10"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+## Problem 1: Estimating a binomial expectiation
+
+# 1. In mathematical notation, write down the distribution of 𝑋. It should include the ∼ symbol.
+
+# 𝑋 ~ Binomial(n = 10, p = 0.3)
+
+
+# 2. Estimate the expectation of 𝑋 through simulating 10,000 replications
+
+```{r}
+
+result_1 <- rbinom(10000, 10, 3/10)
+expectation_1 <- mean(result_1)
+expectation_1
+
+```
+
+
+## Problem 2: Plotting the binomial pmf
+
+```{r}
+
+result_2 <- dbinom(0:10, 10, 0.18)
+plot(0:10, result_2, type = "h", lwd = 5,
+     main = "PMF of Binom(10, 0.18)",
+     xlab = "k",
+     ylab = "p")
+
+```
+## Problem 3: Rolls until 15
+
+```{r}
+
+greater_15 <- function(){
+  result_3 <- sample(1:6, 15, replace = T)
+  sum <- cumsum(result_3)
+  g_15 <- which(sum > 15)
+  return(g_15[1])
+}
+
+outcomes <- replicate(10000, greater_15())
+mean(outcomes)
+
+```
+
+
+

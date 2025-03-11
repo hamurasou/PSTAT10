@@ -1,0 +1,82 @@
+---
+title: "PSTAT 10 Worksheet 9"
+author: "Sou Hamura"
+date: "2024-07-24"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+
+library(tidyverse)
+hibbs <- as_tibble(read.csv("hibbs.dat", sep = ""))
+
+library(ggplot2)
+library(dplyr)
+
+```
+
+## Problem 1: Hibbs
+
+```{r}
+
+ggplot(hibbs, aes(x = growth, y = vote)) +
+  geom_point() +
+  geom_text(aes(label = year), hjust = -0.1, vjust = -0.1, size = 3) +
+  geom_smooth(method = lm, se = FALSE, color = "red", size =  0.5) +
+  geom_hline(yintercept = 50, color = "gray", size = 0.5) + 
+  labs(title = "Bread and Peace",
+       subtitle = "Forecasting the election from the economy",
+       x = "Avg recent growth in personal income",
+       y = "Incumbent party's vote share",
+       caption = "Source: Douglas Hibbs") + 
+  scale_x_continuous(labels = scales::label_percent(scale=1)) +
+  scale_y_continuous(labels = scales::label_percent(scale=1)) +
+  theme_minimal()
+
+```
+
+
+## Problem 2: mpg
+
+```{r}
+
+mpg$cyl <- as.factor(mpg$cyl)
+
+ggplot(mpg, mapping = aes(x = cyl, y = hwy)) +
+  geom_boxplot()
+
+```
+
+
+## Problem 3: babynames
+
+```{r}
+
+library(babynames)
+library(dplyr)
+```
+
+```{r}
+
+robin <- filter(babynames, name == "Robin")
+head(robin, 4)
+
+```
+
+
+```{r}
+
+ggplot(robin, aes(x = year, y = n, color = sex)) +
+  geom_line() +
+  labs(title = "Number of babies named Robin",
+       caption = "Source: SSA",
+       x = "Year",
+       y = "Number")
+
+```

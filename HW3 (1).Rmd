@@ -1,0 +1,156 @@
+---
+title: "PSTAT 10 Homework 3"
+author: "Sou Hamura"
+date: "2024-07-16"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Problem 1: Rolling dice
+
+```{r}
+
+trials <- 10^4
+success <- 0
+for (i in seq_len(trials)){
+  throw <- sample(1:6, size=30, replace=TRUE)
+  count <- table(throw)
+  if (all(count >= 3)){
+    success <- success + 1
+  }
+}
+
+success / trials
+
+```
+## Problem 2: BInomial Distribution
+
+1. About 71% of the Earth is covered with water. I toss a globe into the air 12 times, each time catching it with one hand and noting if the tip of my index finger is over water. What is the probability my finger landed on water 8 times?
+
+```{r}
+
+dbinom(8, 12, 0.71)
+
+```
+
+2. About 8% of men are color blind. A researcher needs three colorblind men for an experiment and begins checking potential subjects.  What is the probability that she finds three or more colorblind men in the first nine she examines?
+
+```{r}
+
+1 - pbinom(2, 9, 0.08)
+
+```
+
+## Problem 3: Normal Distribution
+
+1. Compute ℙ(𝑋 < 60 OR 𝑋 > 65).
+
+```{r}
+
+mean <- 63.6
+sd <- 2.5
+
+pnorm(60, mean, sd) + (1 - pnorm(65, mean, sd))
+
+```
+2. What percentage of women in this population must duck when walking through a door that is 72 inches high?
+
+```{r}
+1 - pnorm(72, mean, sd)
+
+```
+3. Generate a sample of 500 observations of X. Here, we know that the sample is normally distributed. Nevertheless, provide a visual check to see if the sample is normally distributed.
+
+```{r}
+
+sample <- rnorm(500, mean, sd)
+
+hist(sample)
+
+```
+
+## Problem 4: Geometric Distribution
+
+```{r}
+
+prob <- 1/8
+
+```
+
+1. What is the support of X? Is X a discrete or continuous r.v.?
+
+# X is supported by the set of all positive intergers since there can be zero or more failure before the first success.
+# X is a discrete random variable because its values are distinct and countable.
+
+2. Using the base F functions, determine P(X = 4)
+
+```{r}
+
+dgeom(4, prob)
+
+```
+
+3. Determine P(1 < X 4)
+
+```{r}
+
+pgeom(4, prob) - pgeom(1, prob)
+
+```
+
+4. It can be shown that 𝔼𝑋 = (1 − 𝑝)/𝑝. Set a seed of 123 and then generate 1000 observations of X and estimate EX. In terms of absolute distance, how close was the approximation to the theoretical value?
+
+```{r}
+
+theo_v <- (1 - prob)/prob
+
+set.seed(123)
+
+sample_x <- rgeom(1000, prob)
+estimate <- mean(sample_x <= 3)
+
+abs(estimate - theo_v)
+
+```
+## Problem 5: Lining up
+
+1. Ten people, labeled “A” through “J”, are lined up randomly so that each possible arrangement is equally likely.
+
+
+```{r}
+
+trials <- 1000
+success <- vector(length=trials)
+
+for (i in 1:trials){
+  letters <- sample(LETTERS[1:10])
+  where_a <- which(letters == "A")
+  where_b <- which(letters == "B")
+  success[i] <- (abs(where_a - where_b) == 1)
+}
+
+cum_success <- cumsum(success)
+probability <- cum_success / seq_len(trials)
+
+```
+
+2. It can be shown that the theoretical probability is 1/5 = 0.20. Create the following plot of yourapproximation as the number of replications increases.
+
+```{r}
+
+plot(probability,
+     type = "l",
+     xlim = c(0, trials),
+     ylim = c(0.2, 1),
+     main = "Simulating Lining Up",
+     xlab = "Replication",
+     ylab = "Probability")
+
+abline(h = 1/5, col = "red")
+
+```

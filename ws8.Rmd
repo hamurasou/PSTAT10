@@ -1,0 +1,84 @@
+---
+title: "PSTAT 10 Worksheet 8"
+author: "Sou Hamura"
+date: "2024-07-22"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(RSQLite)
+library(sqldf)
+library(DBI)
+chinook_db <- dbConnect(SQLite(), "Chinook_Sqlite.sqlite")
+
+```
+
+## Problem 1
+
+1. What is the total length in minutes of all tracks with GenreId = 2?
+
+```{r}
+
+dbGetQuery(chinook_db, "select GenreId, sum(Milliseconds)/60000 as minutes from Track
+           where Track.GenreId = 2")
+
+```
+
+2. Using a join, add the name of the genre to the above query.
+
+```{r}
+
+dbGetQuery(chinook_db, "select Genre.Name, Track.GenreId,  sum(Milliseconds)/60000 as minutes from Track
+           inner join Genre on Track.GenreId = Genre.GenreId
+           where Track.GenreId = 2")
+
+```
+3. Using a group by, find this information for all genres. I’ve provided just the first 5 records of the output.
+
+```{r}
+
+dbGetQuery(chinook_db, "select Genre.Name, Track.GenreId,  sum(Milliseconds)/60000 as minutes from Track
+           inner join Genre on Track.GenreId = Genre.GenreId
+           group by Track.GenreId, Genre.Name")
+
+```
+
+## Problem 2
+
+
+```{r}
+
+dbGetQuery(chinook_db, "select EmployeeId as RepId, e.FirstName as RepFirstName, e.LastName as RepLastName, CustomerId, c.FirstName as CustFirstName, c.LastName as CustLastName from Customer c INNER JOIN Employee e ON c.SupportRepID = e.EmployeeId
+           WHERE c.FirstName = 'Heather' AND c.LastName = 'Leacock'")
+
+```
+
+
+## Problem 3
+
+1. How many difference countries are the customers from?
+```{r}
+
+dbGetQuery(chinook_db, "select distinct count(Country) from Customer")
+
+```
+
+
+2. Retrieve the unique titles of the employees.
+```{r}
+
+dbGetQuery(chinook_db, "select distinct title from Employee")
+
+```
+3. The following determines how many unique genres there are. Was distinct necessary here? Explain.
+
+# No because the number of GenreId in Genre is already distributed according to the number of Genres
+
+
+

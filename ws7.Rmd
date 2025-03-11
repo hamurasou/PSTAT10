@@ -1,0 +1,87 @@
+---
+title: "PSTAT 10 Worksheet 7"
+author: "Sou Hamura"
+date: "2024-07-18"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+```{r}
+
+library(RSQLite)
+library(sqldf)
+library(DBI)
+chinook_db <- dbConnect(SQLite(), "Chinook_Sqlite.sqlite")
+dbExecute(chinook_db, "pragma foreign_keys = on")
+
+
+```
+
+## Problem 1: Terminology
+
+#Primary keys must be unique (and not NULL)
+#Foreign keys must reference existing primary keys or be NULLr we are working with a relational database, following a relational data model.
+
+
+1. Briefly explain the purpose of primary keys and foreign keys in a relational database.
+
+# The difference between two keys create constraints which enforce the integrity of a database
+
+2. Briefly explain how relational databases model real world data.
+
+# Relational databases organize information into tables to make it easier understand how different data structures relate to each other.
+
+3. Briefly explain the difference between SQL, SQLite, and RSQLite.
+
+# SQL is a language designed to create, read data from, and write data to relational databases. SQLite is designed for simple applications and it's provided by the RSQLite package in R.
+
+## Problem 2: Foreign keys
+
+```{r}
+
+db_table <- dbListTables(chinook_db)
+for (i in seq_along(db_table)){
+  print(dbGetQuery(chinook_db, paste0("pragma foreign_key_list(", db_table[i], ")")))
+}
+
+```
+
+1. Album.ArtistId -> Artist.ArtistId
+2. Customer.SupportRepId -> Employee.EmployeeId
+3. Employee.ReportsTo -> Employee.EmployeeId
+4. Invoice.CustomerId -> Customer.CustomerId
+5. InvoiceLine.TrackId -> Track.TrackId
+6. InvoiceLine.InvoiceId -> Invoice.InvoiceId
+7. PlaylistTrack.TrackId -> Track.TrackId
+8. PlaylistTrack.PlaylistId -> Playlist.PlaylistId
+9. Track.MediaTypeId -> MediaType.MediaTypeId
+10. Track.GenreId -> Genre.GenreId
+11. Track.AlbumId -> Album.AlbumId
+
+
+## Problem 3: Customer
+
+1. Select the CustomerId, FirstName, LastName, State, Country of all customers living in California.
+
+```{r}
+
+dbGetQuery(chinook_db, "select CustomerId, FirstName, LastName, State, country from customer where State = 'CA'")
+
+```
+
+2. How many customers are from Brazil?
+
+```{r}
+
+dbGetQuery(chinook_db, "select count(*) from customer where Country = 'Brazil'")
+
+```
+
+

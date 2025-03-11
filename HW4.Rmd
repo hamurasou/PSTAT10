@@ -1,0 +1,151 @@
+---
+title: "PSTAT 10 Homework 4"
+author: "Sou Hamura"
+date: "2024-07-23"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(RSQLite)
+library(sqldf)
+library(DBI)
+chinook_db <- dbConnect(SQLite(), "Chinook_Sqlite.sqlite")
+
+```
+
+## Problem 1
+
+1. Write a single query that returns the CustomerId, FirstName, LastName of the customer with CustomerId = 10.
+
+```{r}
+
+dbGetQuery(chinook_db, "select CustomerId, FirstName, LastName from Customer 
+           where CustomerId = 10")
+
+```
+
+2. Write a single query that returns the InvoiceId, CustomerId, and Total for invoices billed to the customer with CustomerId = 10 with the total bill exceeding 5.
+
+```{r}
+
+dbGetQuery(chinook_db, "select InvoiceId, CustomerId, Total from Invoice
+           where CustomerId = 10 AND Total > 5")
+
+```
+
+3.Write a single query that combines the previous results, returning the InvoiceId, CustomerId, Total, FirstName, LastName of invoices billed to the customer with CustomerId = 10 with total bill exceeding 5.
+
+```{r}
+
+dbGetQuery(chinook_db, "select Invoice.InvoiceId, Invoice.CustomerId, Invoice.Total, Customer.FirstName, Customer.LastName from Customer
+                              inner join Invoice on Customer.CustomerId = Invoice.CustomerId
+           where Customer.CustomerId = 10 AND Invoice.Total > 5")
+           
+```
+
+## Problem 2
+
+1. What is the title of the highest ranking employee of the store? You may find this by any method.
+
+```{r}
+
+dbGetQuery(chinook_db, 'select FirstName, LastName, Title, ReportsTo from Employee')
+
+#The highest ranking employee is Andrew Adams because he has the title of General Manager and does not report to anyone.
+
+```
+
+2. Which employee of the store has acted as the support rep for the most customers? Return the EmployeeId, FirstName, LastName, Title, and total number of customers. The result is given.
+
+```{r}
+
+dbGetQuery(chinook_db, "select Employee.EmployeeId, Employee.FirstName, Employee.LastName, Title, count(Customer.CustomerID) as TotalCustomers from Employee
+            inner join Customer on Customer.SupportRepID = Employee.EmployeeId
+           group by Employee.EmployeeId, Employee.FirstName, Employee.LastName, Employee.Title")
+
+#Jane Peacock acted as the support rep for the most customers with 21 total customers.
+
+```
+
+## Problem 3
+
+Write a single SQL query to retrieve the AlbumId, Title, and total length in minutes of albums whose total length exceeds 100 minutes. Order by decreasing total length. The output is provided.
+
+```{r}
+
+dbGetQuery(chinook_db, "select Album.AlbumId, Album.Title, sum(Track.Milliseconds)/60000 as TotalLength from Track
+           inner join Album on Track.AlbumId = Album.AlbumId
+           group by Album.AlbumId, Album.Title
+           having TotalLength > 100
+           order by TotalLength DESC")
+
+```
+
+
+## Problem 4
+
+1. Write a single query to retrieve the TrackId, TrackName, PlaylistId, and PlaylistName, ordered by increasing PlaylistId, then by increasing TrackId. Limit the result to 5 records. The result is provided. For full credit, alias the field names to match my output.
+
+```{r}
+
+dbGetQuery(chinook_db, "select Track.TrackId, Track.Name, PlaylistTrack.PlaylistId, Playlist.Name from Playlist
+                      inner join PlaylistTrack on Playlist.PlaylistId = PlaylistTrack.PlaylistId
+                      inner join Track on PlaylistTrack.TrackId = Track.TrackId
+           order by Playlist.PlaylistId ASC, Track.TrackId ASC
+           limit 5")
+
+```
+
+2. Write a single query to retrieve the PlaylistId, PlaylistName, and count of all tracks (TrackCount) within the playlist. The first 3 results of the query are provided, but your query should return all of the results.
+
+```{r}
+
+dbGetQuery(chinook_db, "select Playlist.PlaylistId, Playlist.Name, count(PlaylistTrack.TrackId) as TrackCount from Playlist
+           inner join PlaylistTrack on Playlist.PlaylistId = PlaylistTrack.PlaylistId
+           group by Playlist.PlaylistId, Playlist.Name
+           limit 3")
+
+```
+
+## Problem 5
+
+1. Which customers have spent the most in a single order? To answer this, retrieve the FirstName, LastName, and Total for each invoice, ordered by decreasing total. The first 3 rows of the result are given, but limit your answer to the first 10 rows.
+
+```{r}
+
+dbGetQuery(chinook_db, "select Customer.FirstName, Customer.LastName, Invoice.Total as Total from Customer
+           inner join Invoice on Invoice.CustomerId = Customer.CustomerId
+           order by Total DESC
+           limit 3")
+
+```
+
+2. Which customers have spent the most across all orders? Order the result by decreasing sum total. The first 3 results are shown, but limit your results to 10 rows.
+
+```{r}
+
+dbGetQuery(chinook_db, "select Customer.FirstName, Customer.LastName, sum(total) from Invoice
+           inner join Customer on Invoice.CustomerId = Customer.CustomerId
+           group by Customer.FirstName, Customer.LastName
+           order by sum(total) DESC
+           limit 3")
+
+```
+
+3. Which country has spent the most across all invoices by all people from that country? Order the result by decreasing CountryTotal. The first three rows are given, but limit your result to 10.
+
+```{r}
+
+dbGetQuery(chinook_db, "select Customer.Country, sum(total) as CountryTotal from Invoice
+           inner join Customer on Invoice.CustomerId = Customer.CustomerId
+           group by Customer.Country
+           order by CountryTotal DESC
+           limit 3")
+
+```

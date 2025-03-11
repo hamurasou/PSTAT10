@@ -1,0 +1,84 @@
+---
+title: "PSTAT 10 Worksheet 5"
+author: "Sou Hamura"
+date: "2024-07-08"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Step 1.
+
+```{r}
+
+roll <- function(nroll){
+  result <- sample.int(6, nroll, replace=TRUE)
+  t <- table(result)
+  low <- t["1"] + t["2"] + t["3"]
+  high <- t["4"] + t["5"] + t["6"]
+  odd <- t["1"] + t["3"] + t["5"]
+  even <- t["2"] + t["4"] + t["6"]
+  if (low > high & odd > even){
+    return(TRUE)
+  } else{
+    return(FALSE)
+  }
+}
+
+roll(10000)
+
+```
+
+## Step 2.
+
+```{r}
+replicates <- vector(length=500)
+for (i in 1:500){
+  replicates[i] <- roll(10000)
+}
+
+```
+
+## Step 3.
+
+```{r}
+n_result <- table(replicates)
+probability <- n_result["TRUE"] / 500
+probability
+```
+
+# the estimated answer to the dice problems is 0.3 (= 30%)
+# it was a lot more easy to get the answer than leanring the mutivariate limit theorem because I was able to excute the calculation onlyl by using easy calculations and coding without knowoing what it even
+
+
+## Step 4.
+
+```{r}
+
+running_mean <- function(m){
+  for (i in 1:m){
+    vec <- cumsum(replicates)
+    vec2 <- vec[i] * (1/i)
+  }
+  return(vec2)
+}
+
+running <- sapply(1:500, running_mean)
+
+
+p <- ((1/4) + (asin(1/3)/(2*pi)))
+
+plot(running,
+     type = "l",
+     xlab = "replication", ylab = "extimate",
+     main = "Approximation",
+     ylim = c(0, 0.5)
+     )
+
+abline(h = p, col = "red", lwd = 2)
+
+```
